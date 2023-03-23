@@ -252,7 +252,7 @@ void main(void) {
     UART_sendChar('A');
     while (1) {
 
-        Check_data();
+        //Check_data();
         extract_data();
         segment();
     }
