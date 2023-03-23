@@ -56,7 +56,7 @@ void LED_setup() {
 void UART_setup(void) {
     //    SPBRG = ((_XTAL_FREQ / 16) / Baud_rate) - 1;
     //SPBRG = 51;
-     SPBRG = 129;
+    SPBRG = 129;
 
     BRGH = 1; // baudrate toc do cao
     BRG16 = 0;
@@ -77,7 +77,7 @@ void UART_setup(void) {
 }
 
 void segment() {
-    if (time < 100) {
+    if (time < 500) {
         time++;
     } else {
         //time = 0;
@@ -85,6 +85,7 @@ void segment() {
         if (number > 5) {
             number = 1;
         }
+        // time = 0;
     }
     switch (number) {
         case 1:
@@ -147,11 +148,11 @@ char UART_getChar() {
             break;
         }
     }// lam tre he thong khi bo dem RX dang trong
-    if (RCIF) {
-
-        flag = 1;
-
-    }
+//    if (RCIF) {
+//
+//        flag = 1;
+//
+//    }
     return RCREG;
 }
 
@@ -159,7 +160,7 @@ void Check_data() {
     // index =0
 
     data_check[index] = UART_getChar();
-    if (flag == 1) {
+    //if (flag == 1) {
         //UART_sendChar(index);
         //UART_sendChar(error);
         //UART_sendChar('A');
@@ -168,14 +169,14 @@ void Check_data() {
             index = 0;
             //UART_sendChar('C');
         }
-        
+
 
         if (data_check[1] == '@' && event_1 == 1) {
             event_1 = 2;
             //index = 1;
-            
+
         }
-      
+
 
         if (index < 6 && index > 1 && event_1 == 2) {
             if ((int) data_check[index] < 48 || (int) data_check[index] > 58) {
@@ -191,7 +192,7 @@ void Check_data() {
             //UART_sendChar('M');
 
         }
-        
+
 
         index++;
         if (index > 6) {
@@ -199,34 +200,47 @@ void Check_data() {
         }
 
 
-        flag = 0;
-    }
+      //  flag = 0;
+    //}
 
 
 }
+void __interrupt() ISR(void) {
+   
+        //data = RCREG;
+        //TXREG = RCREG;
+        Check_data();
+//        while (!TRMT);
+//        RCIF = 0;
+//        
+        //UART_sendChar('B');
 
+    
+}
 void extract_data() {
     if (event_2 == 1) {
         for (i = 0; i < 4; i++) {
             data_receive[i] = data_check[i + 2];
             UART_sendChar(data_receive[i]);
-            nghin = (int)data_receive[0];
-//            tram = data_receive[1];
-//            chuc = data_receive[2];
-//            dv = data_receive[3];
+
         }
+        nghin = (int) data_receive[0] - 48;
+        tram = (int) data_receive[1] - 48;
+        chuc = (int) data_receive[2] - 48;
+        dv = (int) data_receive[3] - 48;
         event_2 = 0;
         event_1 = 0;
         index = 0;
         //error = 0;
-//        nghin = data_check[2];
-//        tram = data_check[3];
-//        chuc = data_check[4];
-//        dv = data_check[5];
+        //        nghin = data_check[2];
+        //        tram = data_check[3];
+        //        chuc = data_check[4];
+        //        dv = data_check[5];
     }
 
 
 }
+
 
 void main(void) {
     ANSEL = ANSELH = 0x00;
